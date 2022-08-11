@@ -1,0 +1,20 @@
+Would be nice to list the "empty" defaults in the Base Classes documentation
+
+Should the fallback for a method be defined for R7_object or class_any?
+
+When there will be a temporarily invalid object, is the recommendation to (a) replace the whole property list, so it's never invalid as shown in the R7_basics vignette, or (b) use validate_eventually?
+
+The examples under new_property show how to access properties: self@property
+
+Can I use an abstract class or a union to allow nesting?
+
+How are properties actually checked?  Is it just the class name?  In which case, could I define an empty class, and then redefine it with itself as a property type?  Does it matter that it's holding on to the old definition?
+
+What is an R7_object and a base class?  Can R7_objects be instantiated?
+
+Is the example for class_missing supposed to be an integer?
+
+Figure out the purpose of class_missing and class_any - is it just useful for dispatch, or is it also useful for property types?
+
+Figure out how to set a property to default to NULL
+

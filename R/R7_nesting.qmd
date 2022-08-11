@@ -1,0 +1,67 @@
+---
+title: "R7 Nested Objects"
+format: html
+---
+
+```{r}
+library(R7)
+```
+
+## Nesting unrelated objects
+
+This just works, as expected.
+
+```{r}
+
+# define classes
+simple <- new_class("simple")
+
+complex <- new_class("complex",
+  properties = list(child = simple)
+)
+
+# instantiate
+complex()
+```
+
+## Nesting the same object directly - beware recursion!
+
+It's good that this errors; if you ever tried to instantiate this you'd end up in an infinitely recursing loop.
+
+```{r, error=TRUE}
+nested <- new_class("nested",
+  properties = list(child = nested),
+)
+```
+
+## Nesting the same object, allowing for a base case
+
+It would be nice if this worked, as long as it defaults to a non-recursive object (e.g. `NULL`).
+
+```{r, error=TRUE}
+nested <- new_class("nested",
+  properties = list( child = new_union(NULL, nested) )
+)
+```
+
+## Here's a way around it
+
+```{r}
+nested <- new_class("nested",
+  validator = function(self){ print("running original nested validator"); NULL }
+)
+
+nested <- new_class("nested",
+  properties = list( child = new_union(NULL, nested) ),
+  validator = function(self){ print("running nested validator"); NULL }
+)
+
+nested()
+```
+
+
+
+
+
+
+

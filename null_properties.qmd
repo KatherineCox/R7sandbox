@@ -1,0 +1,71 @@
+---
+title: "Null properties?"
+format: html
+---
+
+```{r}
+library(R7)
+```
+
+## Can a property be NULL?
+
+Yes.
+
+```{r}
+my_class <- new_class("my_class",
+  properties = list(child = NULL)
+)
+my_class()
+```
+
+
+## Can a union include NULL?
+
+Yes.
+
+```{r}
+new_union(class_character, NULL)
+```
+
+## Explore properties that are optionally NULL
+
+```{r}
+char_or_null <- new_class("char_or_null",
+  properties = list(child = new_union(class_character, NULL))
+)
+
+# defaults to char...how does it choose?
+char_or_null()
+
+# permits either
+char_or_null(NULL)
+char_or_null("a")
+
+# permits changing to NULL
+a <- char_or_null("a")
+a
+a@child <- NULL
+a
+
+```
+
+## Does order matter?
+
+Yes!  Looks like it chooses the first class in the union?
+
+```{r}
+null_or_char <- new_class("null_or_char",
+  properties = list(child = new_union(NULL, class_character))
+)
+
+# defaults to NULL
+null_or_char()
+```
+
+
+## Make it default to NULL - explore `new_property`
+
+```{r}
+n <- new_property()
+n
+```
