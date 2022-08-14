@@ -36,7 +36,9 @@ nested <- new_class("nested",
 
 ## Nesting the same object, allowing for a base case
 
-It would be nice if this worked, as long as it defaults to a non-recursive object (e.g. `NULL`).
+`new_union()`
+
+It would be nice if this worked, allowing you to specify at least one other type that can be a "base case". Preferably while still protecting you from infinite recursion by not permitting the nested class to be the default.
 
 ```{r, error=TRUE}
 nested <- new_class("nested",
@@ -44,7 +46,26 @@ nested <- new_class("nested",
 )
 ```
 
-## Here's a way around it
+## Define it twice
+
+This doesn't error and lets me nest my objects, but the property holds on to the original class definition.  I.e., if I instantiate the class without arguments, it fills in the default value using the old definition of nested (`inner`'s child has no `name` or `child` properties, since the original definition of `nested` had no properties).  I don't know what problems that might cause (and it prevents the infinite recursion problem), but I don't like the feel of it.
+
+```{r}
+nested <- new_class("nested")
+
+nested <- new_class("nested",
+  properties = list( 
+    name = class_character,
+    child = nested )
+)
+
+inner <- nested()
+inner
+
+outer <- nested(name = "outer", child = inner)
+outer
+
+```
 
 ```{r}
 nested <- new_class("nested",
@@ -52,16 +73,68 @@ nested <- new_class("nested",
 )
 
 nested <- new_class("nested",
-  properties = list( child = new_union(NULL, nested) ),
+  properties = list( child = nested ),
   validator = function(self){ print("running nested validator"); NULL }
 )
 
 nested()
 ```
 
+# Use a parent class
+
+```{r}
+nested_parent <- new_class("nested_parent")
+
+nested <- new_class("nested", parent = nested_parent,
+  properties = list( 
+    name = class_character,
+    child = nested_parent )
+)
+
+inner <- nested()
+inner
+
+outer <- nested(name = "outer", child = inner)
+outer
+
+```
 
 
+## Why does this break with an abstract class?
 
+Ah, because if you just instantiate `nested()` with no arguments, then it tries to fill in the default child value by instantiating `nested_parent`, which is impossible.
+
+The error is confusing though, poke at that more.
+
+```{r, error=TRUE}
+nested_parent <- new_class("nested_parent", abstract = TRUE)
+
+nested <- new_class("nested", parent = nested_parent,
+  properties = list( 
+    name = class_character,
+    child = nested_parent )
+)
+
+inner <- nested()
+inner
+
+```
+
+## Abstract class errors
+
+```{r, error=TRUE}
+a <- new_class("a", abstract = TRUE)
+a()
+
+aa <- new_class("aa", properties = list(child = a))
+aa()
+
+ab <- new_class("ab", parent=a, properties = list(child = a))
+ab()
+
+ac <- new_class("ac", parent=a)
+ac()
+```
 
 
 
